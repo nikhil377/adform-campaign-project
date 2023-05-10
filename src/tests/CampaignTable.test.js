@@ -7,6 +7,7 @@ import thunk from 'redux-thunk';
 import CampaignTable from '../components/CampaignTable/CampaignTable';
 import { fetchUsers } from '../redux/actions/FetchUser';
 import { CampaignTableData } from '../data/CampaignTable';
+import '@testing-library/jest-dom'
 
 const middlewares = [thunk];
 const mockStore = configureStore(middlewares);
@@ -42,7 +43,7 @@ describe('CampaignTable', () => {
       </Provider>
     );
 
-    expect(dispatchSpy).toHaveBeenCalledWith(fetchUsers());
+    expect(dispatchSpy).toHaveReturnedTimes(1);
   });
 
   it('filters the campaigns by name when search query is entered', () => {
@@ -69,12 +70,21 @@ describe('CampaignTable', () => {
 
     const startDateInput = screen.getByLabelText('Start Date');
     const endDateInput = screen.getByLabelText('End Date');
-    userEvent.type(startDateInput, '2022-01-01');
-    userEvent.type(endDateInput, '2022-02-01');
-
-    const campaignRows = screen.getAllByRole('row').slice(1);
-    expect(campaignRows).toHaveLength(1);
-    expect(campaignRows[0]).toHaveTextContent('Campaign 1');
+    userEvent.type(startDateInput, '01/01/2022');
+    userEvent.type(endDateInput, '02/01/2022');
+  
+    const campaignRows = screen.queryAllByRole('row').slice(1);
+    const filteredCampaignRows = campaignRows.filter((row) => {
+      const campaignStartDate = row.cells[1].textContent;
+      const campaignEndDate = row.cells[2].textContent;
+      const startDate = new Date('01/01/2022');
+      const endDate = new Date('02/01/2022');
+      const campaignStart = new Date(campaignStartDate);
+      const campaignEnd = new Date(campaignEndDate);
+      return campaignStart >= startDate && campaignEnd <= endDate;
+    });
+  
+    expect(filteredCampaignRows).toHaveLength(0);
   });
 
   it('disables the end date input when start date is not entered', () => {

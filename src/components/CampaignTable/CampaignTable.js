@@ -170,12 +170,12 @@ const CampaignTable = () => {
           </div>
       </div>
           {filteredCampaigns.length == 0 && !isError && (
-            <div>No Data Found !</div>
+            <div data-testid="no-data">No Data Found !</div>
           )}
           {filteredCampaigns.length > 0 && (
             <table className='user-table'>
               <thead>
-                <tr>
+                <tr data-testid="row">
                   <th>Name</th>
                   <th>User Name</th>
                   <th>Start Date</th>
@@ -189,7 +189,7 @@ const CampaignTable = () => {
                 {filteredCampaigns &&
                   filteredCampaigns.length > 0 &&
                   filteredCampaigns.map((user) => (
-                    <tr key={user.id}>
+                    <tr key={user.id} data-testid="row">
                       <td>{user.campaign}</td>
                       <td>{user.userName ? user.userName : 'Unknown User'}</td>
                       <td>{user.startDate}</td>

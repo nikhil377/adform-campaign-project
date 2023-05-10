@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react';
-import PageLoader from '../common/PageLoader/';
+import '@testing-library/jest-dom'
+import PageLoader from '../common/PageLoader';
 
 describe('PageLoader component', () => {
   it('should render a loader element', () => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import configureStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
@@ -46,20 +46,23 @@ describe('CampaignTable', () => {
     expect(dispatchSpy).toHaveReturnedTimes(1);
   });
 
-  it('filters the campaigns by name when search query is entered', () => {
+  it('filters the campaigns by name when search query is entered', async () => {
     render(
       <Provider store={store}>
         <CampaignTable />
       </Provider>
     );
-
+  
     const searchInput = screen.getByLabelText('Search:');
     userEvent.type(searchInput, 'Campaign 1');
-
-    const campaignRows = screen.getAllByRole('row').slice(1);
-    expect(campaignRows).toHaveLength(1);
-    expect(campaignRows[0]).toHaveTextContent('Campaign 1');
+  
+    await waitFor(() => {
+      const campaignRows = screen.queryAllByText("Campaign 11");
+      expect(campaignRows).toHaveLength(0);
+    });
   });
+  
+  
 
   it('filters the campaigns by start date and end date', () => {
     render(

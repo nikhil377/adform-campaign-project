@@ -87,10 +87,10 @@ const CampaignTable = () => {
             />
           </div>
       </div>
-          {campaigns.length == 0 && !isError && (
+          {campaigns?.length == 0 && !isError && (
             <div data-testid="no-data">No Data Found !</div>
           )}
-          {campaigns.length > 0 && (
+          {campaigns?.length > 0 && (
             <table className='user-table'>
               <thead>
                 <tr data-testid="row">
@@ -105,9 +105,9 @@ const CampaignTable = () => {
 
               <tbody>
                 {campaigns &&
-                  campaigns.length > 0 &&
-                  campaigns.map((user) => (
-                    <tr key={user.id} data-testid="row">
+                  campaigns?.length > 0 &&
+                  campaigns?.map((user) => (
+                  <tr key={user.id} data-testid="row">
                       <td>{user.campaign}</td>
                       <td>{user.userName ? user.userName : 'Unknown User'}</td>
                       <td>{user.startDate}</td>

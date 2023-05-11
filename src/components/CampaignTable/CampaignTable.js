@@ -7,13 +7,9 @@ import './CampaignTable.css';
 
 const CampaignTable = () => {
   const dispatch = useDispatch();
-  const users = useSelector((state) => state.users);
+  const campaigns = useSelector((state) => state.campaigns);
   const isLoading = useSelector((state) => state.isLoading);
   const isError = useSelector((state) => state.error);
-
-
-  const [filteredCampaigns, setFilteredCampaigns] = useState([]);
-  const [originalfilteredCampaigns, setOriginalFilteredCampaigns] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [startDateFilter, setStartDateFilter] = useState('');
@@ -21,84 +17,9 @@ const CampaignTable = () => {
   const [endDateDisabled, setEndDateDisabled] = useState(true);
 
   useEffect(() => {
-    dispatch(fetchUsers());
-  }, []);
+    dispatch(fetchUsers(searchQuery, startDateFilter, endDateFilter));
+  }, [searchQuery,startDateFilter,endDateFilter]);
 
-  useEffect(() => {
-    if (users && users.length > 0) {
-      const filteredCampaignData = [];
-      CampaignTableData.filter((obj) => {
-        for (let i = 0; i < users.length; i++) {
-          if (obj.userId === users[i].id) {
-            obj['userName'] = users[i]['name'];
-            obj['campaign'] = 'Campaign ' + obj.userId;
-            obj['active'] = campaignFallsBetweenDates(
-              obj.startDate,
-              obj.endDate
-            );
-            filteredCampaignData.push(obj);
-          }
-        }
-      });
-      setFilteredCampaigns(filteredCampaignData);
-      setOriginalFilteredCampaigns(filteredCampaignData);
-    }
-  }, [users]);
-
-
-  useEffect(() => {
-    const filteredBySearchQuery =
-      searchQuery.trim() === ''
-        ? originalfilteredCampaigns
-        : originalfilteredCampaigns.filter((campaign) =>
-            campaign.campaign.toLowerCase().includes(searchQuery.toLowerCase())
-          );
-
-    setFilteredCampaigns(filteredBySearchQuery);
-  }, [searchQuery]);
-
-  
-  useEffect(() => {
-    const filteredData = originalfilteredCampaigns.filter((data) => {
-      if (startDateFilter && endDateFilter) {
-        return (
-          getTimeForDate(data.startDate) >= getTimeForDate(startDateFilter) &&
-          getTimeForDate(data.endDate) <= getTimeForDate(endDateFilter)
-        );
-      } else if (startDateFilter) {
-        return (
-          getTimeForDate(data.startDate) >= getTimeForDate(startDateFilter)
-        );
-      } else if (endDateFilter) {
-        return getTimeForDate(data.endDate) <= getTimeForDate(endDateFilter);
-      } else {
-        setEndDateDisabled(true);
-        return originalfilteredCampaigns;
-      }
-    });
-    setFilteredCampaigns(filteredData);
-  }, [startDateFilter, endDateFilter]);
-  
-  const campaignFallsBetweenDates = (dateFrom, dateTo) => {
-    // current date in dd/mm/yyyy
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    let mm = today.getMonth() + 1;
-    let dd = today.getDate();
-    if (dd < 10) dd = '0' + dd;
-    if (mm < 10) mm = '0' + mm;
-    const formattedToday = dd + '/' + mm + '/' + yyyy;
-
-    return getTimeForDate(formattedToday) >= getTimeForDate(dateFrom) &&
-      getTimeForDate(formattedToday) <= getTimeForDate(dateTo)
-      ? 'Active'
-      : 'Inactive';
-  };
-
-  const getTimeForDate = (date) => {
-    var dateData = new Date(date);
-    return dateData.getTime();
-  };
 
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
@@ -107,7 +28,6 @@ const CampaignTable = () => {
 
   const handleStartDateFilterChange = (event) => {
     setStartDateFilter(event.target.value);
-    //handleFilter();
     setEndDateDisabled(false);
   };
 
@@ -117,17 +37,15 @@ const CampaignTable = () => {
     } else {
       alert('End date should be greater than or equal to start date.');
       setEndDateFilter('');
-      setFilteredCampaigns([]);
     }
-    //  handleFilter();
   };
 
 
-  const formatNumber = (number) => {
+  const formatNumberToUSDK = (number) => {
     if (number >= 1000) {
-      return (number / 1000).toFixed(1) + 'K';
+      return (number / 1000)?.toFixed(1) + 'K';
     } else {
-      return number.toString();
+      return number?.toString();
     }
   };
 
@@ -169,10 +87,10 @@ const CampaignTable = () => {
             />
           </div>
       </div>
-          {filteredCampaigns.length == 0 && !isError && (
+          {campaigns.length == 0 && !isError && (
             <div data-testid="no-data">No Data Found !</div>
           )}
-          {filteredCampaigns.length > 0 && (
+          {campaigns.length > 0 && (
             <table className='user-table'>
               <thead>
                 <tr data-testid="row">
@@ -186,9 +104,9 @@ const CampaignTable = () => {
               </thead>
 
               <tbody>
-                {filteredCampaigns &&
-                  filteredCampaigns.length > 0 &&
-                  filteredCampaigns.map((user) => (
+                {campaigns &&
+                  campaigns.length > 0 &&
+                  campaigns.map((user) => (
                     <tr key={user.id} data-testid="row">
                       <td>{user.campaign}</td>
                       <td>{user.userName ? user.userName : 'Unknown User'}</td>
@@ -201,7 +119,7 @@ const CampaignTable = () => {
                           <span>&#128308; Inactive</span>
                         )}
                       </td>
-                      <td>{formatNumber(user.Budget)} USD</td>
+                      <td>{formatNumberToUSDK(user.Budget)} USD</td>
                     </tr>
                   ))}
               </tbody>
